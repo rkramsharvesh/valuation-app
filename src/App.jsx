@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { calculateDCF } from './utils/dcfCalculator';
+import { calculateDCF } from './utils/dcfcalculator';
 
 function App() {
   const [cashFlows, setCashFlows] = useState(["", "", "", "", ""]);
