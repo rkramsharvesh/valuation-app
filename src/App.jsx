@@ -81,3 +81,7 @@ function App() {
         </div>
       )}
     </div>
+  ); // ← This was missing
+}
+
+export default App;
