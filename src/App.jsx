@@ -80,3 +80,4 @@ function App() {
           <p><strong>Total DCF Value:</strong> {result.dcfValue}</p>
         </div>
       )}
+    </div>
