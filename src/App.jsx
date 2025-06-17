@@ -18,70 +18,81 @@ function App() {
     const dr = parseFloat(discountRate);
     const tg = parseFloat(terminalGrowth);
 
-    if (numericFlows.some(isNaN) || isNaN(dr) || isNaN(tg)) {
-      alert("Please enter valid numeric values.");
-      return;
-    }
-
-    const output = calculateDCF({
+    const dcfResult = calculateDCF({
       cashFlows: numericFlows,
       discountRate: dr,
-      terminalGrowth: tg,
+      terminalGrowth: tg
     });
 
-    setResult(output);
+    setResult(dcfResult);
   };
 
   return (
-    <div style={{ maxWidth: '600px', margin: '0 auto', padding: '2rem', fontFamily: 'sans-serif' }}>
-      <h1>DCF Valuation Calculator</h1>
+    <div style={{ padding: '20px' }}>
+      <h1>DCF Valuation</h1>
 
-      <h3>Enter Free Cash Flows (5 years)</h3>
-      {cashFlows.map((val, idx) => (
+      <div>
+        {cashFlows.map((val, idx) => (
+          <input
+            key={idx}
+            type="number"
+            value={val}
+            placeholder={`Year ${idx + 1} CF`}
+            onChange={(e) => handleChange(idx, e.target.value)}
+            style={{ margin: '5px' }}
+          />
+        ))}
+      </div>
+
+      <div style={{ marginTop: '10px' }}>
         <input
-          key={idx}
           type="number"
-          placeholder={`Year ${idx + 1}`}
-          value={val}
-          onChange={(e) => handleChange(idx, e.target.value)}
-          style={{ display: 'block', marginBottom: '10px', width: '100%' }}
+          step="0.01"
+          placeholder="Discount Rate (e.g. 0.12)"
+          value={discountRate}
+          onChange={(e) => setDiscountRate(e.target.value)}
         />
-      ))}
+        <input
+          type="number"
+          step="0.01"
+          placeholder="Terminal Growth Rate (e.g. 0.03)"
+          value={terminalGrowth}
+          onChange={(e) => setTerminalGrowth(e.target.value)}
+          style={{ marginLeft: '10px' }}
+        />
+      </div>
 
-      <h3>Discount Rate (e.g. 0.12)</h3>
-      <input
-        type="number"
-        value={discountRate}
-        onChange={(e) => setDiscountRate(e.target.value)}
-        placeholder="Discount Rate"
-        step="0.00001"
-        style={{ display: 'block', marginBottom: '10px', width: '100%' }}
-      />
-
-      <h3>Terminal Growth Rate (e.g. 0.03)</h3>
-      <input
-        type="number"
-        value={terminalGrowth}
-        onChange={(e) => setTerminalGrowth(e.target.value)}
-        placeholder="Terminal Growth"
-        step="0.00001"
-        style={{ display: 'block', marginBottom: '20px', width: '100%' }}
-      />
-
-      <button onClick={handleSubmit} style={{ padding: '10px 20px', fontSize: '16px' }}>
+      <button onClick={handleSubmit} style={{ marginTop: '10px' }}>
         Calculate DCF
       </button>
 
       {result && (
-        <div style={{ marginTop: '30px' }}>
-          <h2>Results:</h2>
-          <p><strong>NPV of Cash Flows:</strong> {result.npv}</p>
-          <p><strong>Terminal Value (Discounted):</strong> {result.terminalValue}</p>
-          <p><strong>Total DCF Value:</strong> {result.dcfValue}</p>
+        <div style={{ marginTop: '20px' }}>
+          <h2>Results</h2>
+          <p><strong>Intrinsic Value:</strong> ${result.intrinsicValue.toFixed(2)}</p>
+          <p><strong>Terminal Value (PV):</strong> ${result.terminalValue.toFixed(2)}</p>
+
+          <h3>Cash Flow PVs:</h3>
+          <ul>
+            {result.presentValues.map((pv, idx) => (
+              <li key={idx}>Year {idx + 1}: ${pv.toFixed(2)}</li>
+            ))}
+          </ul>
+
+          {result.flags.length > 0 && (
+            <div style={{ color: 'red' }}>
+              <h4>Warnings / Flags:</h4>
+              <ul>
+                {result.flags.map((flag, idx) => (
+                  <li key={idx}>{flag}</li>
+                ))}
+              </ul>
+            </div>
+          )}
         </div>
       )}
     </div>
-  ); // ← This was missing
+  );
 }
 
 export default App;
