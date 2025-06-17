@@ -27,44 +27,72 @@ function App() {
     setResult(dcfResult);
   };
 
+  const isValidInput = () => {
+    const numericFlows = cashFlows.map(val => parseFloat(val));
+    const dr = parseFloat(discountRate);
+    const tg = parseFloat(terminalGrowth);
+
+    return (
+      numericFlows.every(cf => !isNaN(cf) && cf >= 0) &&
+      dr > 0 && dr < 1 &&
+      tg >= 0 && tg < dr
+    );
+  };
+
   return (
     <div style={{ padding: '20px' }}>
       <h1>DCF Valuation</h1>
 
       <div>
-        {cashFlows.map((val, idx) => (
+         {cashFlows.map((val, idx) => (
           <input
             key={idx}
             type="number"
+            min="0"
+            step="0.01"
             value={val}
             placeholder={`Year ${idx + 1} CF`}
             onChange={(e) => handleChange(idx, e.target.value)}
             style={{ margin: '5px' }}
+            required
           />
         ))}
       </div>
 
-      <div style={{ marginTop: '10px' }}>
+
+            <div style={{ marginTop: '10px' }}>
         <input
           type="number"
-          step="0.01"
+          min="0.0001"
+          max="0.99"
+          step="0.0001"
           placeholder="Discount Rate (e.g. 0.12)"
           value={discountRate}
           onChange={(e) => setDiscountRate(e.target.value)}
+          required
         />
         <input
           type="number"
-          step="0.01"
+          min="0"
+          max={discountRate || "0.99"}
+          step="0.0001"
           placeholder="Terminal Growth Rate (e.g. 0.03)"
           value={terminalGrowth}
           onChange={(e) => setTerminalGrowth(e.target.value)}
           style={{ marginLeft: '10px' }}
+          required
         />
       </div>
 
-      <button onClick={handleSubmit} style={{ marginTop: '10px' }}>
+
+      <button
+        onClick={handleSubmit}
+        disabled={!isValidInput()}
+        style={{ marginTop: '10px' }}
+      >
         Calculate DCF
       </button>
+
 
       {result && (
         <div style={{ marginTop: '20px' }}>
