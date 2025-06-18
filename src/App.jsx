@@ -15,18 +15,18 @@ function App() {
   const [error, setError] = useState("");
   
   // This function uses the selected country and fetched beta to compute the discount rate.
-  const handleCountrySelection = async () => {
-  if (!country || !companyData) return;
+  const handleCountrySelection = async (data) => {
+    if (!country || !data) return;
 
-  const riskData = await fetchCountryRiskData(country);
+    const riskData = await fetchCountryRiskData(country);
 
-  if (riskData) {
-    const beta = companyData?.profile?.beta || 1;
-    const dr = (riskData.riskFreeRate / 100) + beta * (riskData.equityRiskPremium / 100);
-    setDiscountRate(dr.toFixed(4));
-    console.log(`Discount Rate: ${dr.toFixed(4)}`);
+    if (riskData) {
+      const beta = data?.profile?.beta || 1;
+      const dr = (riskData.riskFreeRate / 100) + beta * (riskData.equityRiskPremium / 100);
+      setDiscountRate(dr.toFixed(4));
+      console.log(`Discount Rate: ${dr.toFixed(4)}`);
     } else {
-    alert("Could not fetch country risk data.");
+      alert("Could not fetch country risk data.");
     }
   };
 
@@ -64,13 +64,13 @@ function App() {
   };
  
   // Fetch company details using ticker   
-  const handleFetch = async () => {
+ const handleFetch = async () => {
   if (!ticker.trim()) {
     setError("Please enter a ticker symbol.");
     setCompanyData(null);
     return;
   }
-  
+
   const data = await fetchFinancials(ticker.trim().toUpperCase());
 
   if (data && data.income && data.income.length > 0) {
@@ -78,28 +78,31 @@ function App() {
     setError("");
     console.log(data);
 
-    //Call the country logic once both ticker + country are selected
-    if (country) {
-      await handleCountrySelection();
-    }
-  } else {
-    setCompanyData(null);
-    setError("Ticker not found. Please enter a valid listed company ticker.");
-  }
-};
-  
-    // Extract 5 years of free cash flows (most recent first)
+    // Extract 5 years of free cash flows
     const latestFCFs = data.cashflow
       ?.slice(0, 5)
       .map(entry => entry.freeCashFlow)
-      .reverse(); // optional: to display oldest first
+      .reverse(); // oldest to most recent
 
     if (latestFCFs && latestFCFs.length === 5) {
       setCashFlows(latestFCFs.map(val => val ? val.toFixed(2) : ""));
     } else {
       console.warn("Not enough FCF data to fill 5 years.");
     }
-      
+
+    // Call country logic after ticker + country are selected
+    if (country) {
+      await handleCountrySelection(data);
+    }
+
+  } else {
+    setCompanyData(null);
+    setError("Ticker not found. Please enter a valid listed company ticker.");
+  }
+};
+
+  
+   
    
   return (
     <div style={{ padding: '20px' }}>
